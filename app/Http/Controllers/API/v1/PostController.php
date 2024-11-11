@@ -27,6 +27,10 @@ class PostController extends Controller
                         'user' => [
                             'name' => $post->user->name,
                             'user_profile' => $post->user->user_profile
+                        ],
+                        'category' => [
+                            'name' => $post->category->category_name,
+                            'category_slug' => $post->category->category_slug,
                         ]
                     ];
                 }),
