@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('post_slug');
             $table->text('post_content');
             $table->string('post_image');
-            $table->date('publish_date');
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Category::class);
             $table->timestamps();

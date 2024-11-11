@@ -71,7 +71,6 @@ class DatabaseSeeder extends Seeder
             'post_slug' => 'test-1',
             'post_content' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. A asperiores optio dolorum sapiente quia ea accusantium quisquam dolorem provident molestiae repellat eligendi atque architecto, eos at ducimus nemo eum vitae aut rem saepe itaque molestias! Inventore blanditiis autem rem ipsa suscipit reprehenderit incidunt sint iste, repellat in, praesentium omnis eveniet.',
             'post_image' => 'img/post.png',
-            'publish_date' => date('Y-m-d'),
             'user_id' => 2,
             'category_id' => 1
         ]);
@@ -80,7 +79,6 @@ class DatabaseSeeder extends Seeder
             'post_slug' => 'test-2',
             'post_content' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. A asperiores optio dolorum sapiente quia ea accusantium quisquam dolorem provident molestiae repellat eligendi atque architecto, eos at ducimus nemo eum vitae aut rem saepe itaque molestias! Inventore blanditiis autem rem ipsa suscipit reprehenderit incidunt sint iste, repellat in, praesentium omnis eveniet.',
             'post_image' => 'img/post.png',
-            'publish_date' => date('Y-m-d'),
             'user_id' => 2,
             'category_id' => 2
         ]);
