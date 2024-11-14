@@ -31,5 +31,6 @@ Route::prefix('v1')->group(function () {
     Route::controller(CategoryController::class)->group(function () {
         Route::get('/categories', 'index');
         Route::post('/category', 'store');
+        // Route::get('/category/{slug}', 'show');
     });
 });

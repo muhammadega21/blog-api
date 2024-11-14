@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'Admin',
+            'username' => 'admin',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('12345'),
             'user_profile' => 'img/user.png',
@@ -37,6 +38,7 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'Muhammad Ega Dermawan',
+            'username' => 'ega',
             'email' => 'dermawane988@gmail.com',
             'password' => Hash::make('12345'),
             'user_profile' => 'img/user.png',
@@ -51,34 +53,34 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Category::create([
-            'category_name' => 'Technology',
-            'category_slug' => 'technology',
-            'category_icon' => 'icon/icon.png',
+            'name' => 'Technology',
+            'slug' => 'technology',
+            'icon' => 'icon/icon.png',
         ]);
         Category::create([
-            'category_name' => 'Holiday & Travel',
-            'category_slug' => 'holiday-&-travel',
-            'category_icon' => 'icon/icon.png',
+            'name' => 'Holiday & Travel',
+            'slug' => 'holiday-&-travel',
+            'icon' => 'icon/icon.png',
         ]);
         Category::create([
-            'category_name' => 'Food',
-            'category_slug' => 'food',
-            'category_icon' => 'icon/icon.png',
+            'name' => 'Food',
+            'slug' => 'food',
+            'icon' => 'icon/icon.png',
         ]);
 
         Post::create([
-            'post_title' => 'test 1',
-            'post_slug' => 'test-1',
-            'post_content' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. A asperiores optio dolorum sapiente quia ea accusantium quisquam dolorem provident molestiae repellat eligendi atque architecto, eos at ducimus nemo eum vitae aut rem saepe itaque molestias! Inventore blanditiis autem rem ipsa suscipit reprehenderit incidunt sint iste, repellat in, praesentium omnis eveniet.',
-            'post_image' => 'img/post.png',
+            'title' => 'test 1',
+            'slug' => 'test-1',
+            'content' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. A asperiores optio dolorum sapiente quia ea accusantium quisquam dolorem provident molestiae repellat eligendi atque architecto, eos at ducimus nemo eum vitae aut rem saepe itaque molestias! Inventore blanditiis autem rem ipsa suscipit reprehenderit incidunt sint iste, repellat in, praesentium omnis eveniet.',
+            'image' => 'img/post.png',
             'user_id' => 2,
             'category_id' => 1
         ]);
         Post::create([
-            'post_title' => 'test 2',
-            'post_slug' => 'test-2',
-            'post_content' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. A asperiores optio dolorum sapiente quia ea accusantium quisquam dolorem provident molestiae repellat eligendi atque architecto, eos at ducimus nemo eum vitae aut rem saepe itaque molestias! Inventore blanditiis autem rem ipsa suscipit reprehenderit incidunt sint iste, repellat in, praesentium omnis eveniet.',
-            'post_image' => 'img/post.png',
+            'title' => 'test 2',
+            'slug' => 'test-2',
+            'content' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. A asperiores optio dolorum sapiente quia ea accusantium quisquam dolorem provident molestiae repellat eligendi atque architecto, eos at ducimus nemo eum vitae aut rem saepe itaque molestias! Inventore blanditiis autem rem ipsa suscipit reprehenderit incidunt sint iste, repellat in, praesentium omnis eveniet.',
+            'image' => 'img/post.png',
             'user_id' => 2,
             'category_id' => 2
         ]);

@@ -69,4 +69,25 @@ class CategoryController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    // public function show($slug)
+    // {
+    //     $category = Category::where('category_slug', $slug)->first();
+
+    //     if ($category) {
+    //         return response()->json([
+    //             'status' => Response::HTTP_OK,
+    //             'data' =>  [
+    //                 'category_name' => $category->category_name,
+    //                 'category_icon' => $category->category_icon,
+    //             ],
+
+    //         ], Response::HTTP_OK);
+    //     } else {
+    //         return response()->json([
+    //             'message' => 'Category Not Found',
+    //             'status' => Response::HTTP_NOT_FOUND,
+    //         ], Response::HTTP_NOT_FOUND);
+    //     }
+    // }
 }

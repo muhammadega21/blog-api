@@ -93,7 +93,6 @@ class PostController extends Controller
 
         if ($post) {
             return response()->json([
-                'message' => 'Post by ' . $post->user->name,
                 'status' => Response::HTTP_OK,
                 'data' =>  [
                     'post_title' => $post->post_title,
@@ -109,11 +108,12 @@ class PostController extends Controller
                         'name' => $post->category->category_name,
                         'category_slug' => $post->category->category_slug,
                     ]
-                ]
-            ]);
+                ],
+
+            ], Response::HTTP_OK);
         } else {
             return response()->json([
-                'message' => 'Post empty',
+                'message' => 'Post Not Found',
                 'status' => Response::HTTP_NOT_FOUND,
             ], Response::HTTP_NOT_FOUND);
         }
