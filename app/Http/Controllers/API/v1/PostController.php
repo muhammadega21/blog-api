@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Throwable;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -59,15 +60,34 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required',
+            'title' => 'required|max:100|unique:posts,title',
             'body' => 'required',
-            'image' => 'required',
+            'image' => 'required|mimes:png,jpg,jpeg|max:3072',
             'user_id' => 'required',
             'category_id' => 'required',
+        ], [
+            'title.required' => 'Judul Tidak Boleh Kosong!',
+            'title.max' => 'Judul Tidak Lebih 100 Karakter!',
+            'title.unique' => 'Judul Ini Sudah Ada!',
+
+            'body.required' => 'Isi Postingan Tidak Boleh Kosong!',
+
+            'image.required' => 'Gambar Tidak Boleh Kosong!',
+            'image.image' => 'Gambar Harus Berformat jpg, jpeg, dan png!',
+            'image.max' => 'Gambar Tidak Lebih dari 3mb!',
+
+            'category_id.required' => 'Kategori Tidak Boleh Kosong!',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors());
+        }
+
+        if ($request->file('image')) {
+            if ($request->oldImage) {
+                Storage::delete($request->oldImage);
+            }
+            $image = $request->file('image')->store('image');
         }
 
         try {
@@ -75,7 +95,7 @@ class PostController extends Controller
                 'title' => $request->input('title'),
                 'slug' => Str::slug($request->input('title')),
                 'body' => $request->input('body'),
-                'image' => $request->input('image'),
+                'image' => $image,
                 'user_id' => $request->input('user_id'),
                 'category_id' => $request->input('category_id'),
             ]);
