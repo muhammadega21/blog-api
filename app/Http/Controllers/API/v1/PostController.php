@@ -11,50 +11,57 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use Throwable;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::latest('publish_date')->get();
+        $query = Post::query()->latest('created_at');
 
-        if ($posts) {
-            return response()->json([
-                'message' => 'List Posts',
-                'status' => Response::HTTP_OK,
-                'data' => $posts->map(function ($post) {
-                    return [
-                        'post_title' => $post->post_title,
-                        'post_slug' => $post->post_slug,
-                        'post_content' => $post->post_content,
-                        'post_image' => $post->post_image,
-                        'publish_date' => Carbon::createFromFormat('Y-m-d H:i:s', $post->created_at)->toDateTimeString(),
-                        'user' => [
-                            'name' => $post->user->name,
-                            'user_profile' => $post->user->user_profile
-                        ],
-                        'category' => [
-                            'name' => $post->category->category_name,
-                            'category_slug' => $post->category->category_slug,
-                        ]
-                    ];
-                }),
-            ], Response::HTTP_OK);
-        } else {
+        $keyword = $request->input('title');
+        if ($keyword) {
+            $query->where('title', 'LIKE', '%' . $keyword . '%');
+        }
+
+        $posts = $query->paginate(10);
+
+        if ($posts->isEmpty()) {
             return response()->json([
                 'message' => 'Post empty',
                 'status' => Response::HTTP_NOT_FOUND,
             ], Response::HTTP_NOT_FOUND);
         }
+
+        return response()->json([
+            'message' => 'List Posts',
+            'status' => Response::HTTP_OK,
+            'data' => $posts->map(function ($post) {
+                return [
+                    'title' => $post->title,
+                    'slug' => $post->slug,
+                    'body' => $post->body,
+                    'image' => $post->image,
+                    'publish_date' => $post->created_at->format('Y-m-d H:i:s'),
+                    'user' => [
+                        'name' => $post->user->name,
+                        'user_profile' => $post->user->user_profile,
+                    ],
+                    'category' => [
+                        'name' => $post->category->name,
+                        'category_slug' => $post->category->slug,
+                    ],
+                ];
+            }),
+        ], Response::HTTP_OK);
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'post_title' => 'required',
-            'post_content' => 'required',
-            'post_image' => 'required',
+            'title' => 'required',
+            'body' => 'required',
+            'image' => 'required',
             'user_id' => 'required',
             'category_id' => 'required',
         ]);
@@ -65,10 +72,10 @@ class PostController extends Controller
 
         try {
             Post::create([
-                'post_title' => $request->input('post_title'),
-                'post_slug' => Str::slug($request->input('post_title')),
-                'post_content' => $request->input('post_content'),
-                'post_image' => $request->input('post_image'),
+                'title' => $request->input('title'),
+                'slug' => Str::slug($request->input('title')),
+                'body' => $request->input('body'),
+                'image' => $request->input('image'),
                 'user_id' => $request->input('user_id'),
                 'category_id' => $request->input('category_id'),
             ]);
@@ -78,7 +85,7 @@ class PostController extends Controller
                 'message' => 'Data stored to db'
             ], Response::HTTP_OK);
         } catch (Exception $e) {
-            Log::error('Error  storting data :' . $e->getMessage());
+            Log::error('Error stored data :' . $e->getMessage());
 
             return response()->json([
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -89,33 +96,100 @@ class PostController extends Controller
 
     public function show($slug)
     {
-        $post = Post::where('post_slug', $slug)->first();
+        $post = Post::where('slug', $slug)->first();
 
-        if ($post) {
+        if ($post->isEmpty()) {
             return response()->json([
-                'status' => Response::HTTP_OK,
-                'data' =>  [
-                    'post_title' => $post->post_title,
-                    'post_slug' => $post->post_slug,
-                    'post_content' => $post->post_content,
-                    'post_image' => $post->post_image,
-                    'publish_date' => Carbon::createFromFormat('Y-m-d H:i:s', $post->created_at)->toDateTimeString(),
-                    'user' => [
-                        'name' => $post->user->name,
-                        'user_profile' => $post->user->user_profile
-                    ],
-                    'category' => [
-                        'name' => $post->category->category_name,
-                        'category_slug' => $post->category->category_slug,
-                    ]
-                ],
-
-            ], Response::HTTP_OK);
-        } else {
-            return response()->json([
-                'message' => 'Post Not Found',
+                'message' => 'Post empty',
                 'status' => Response::HTTP_NOT_FOUND,
             ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'data' =>  [
+                'title' => $post->title,
+                'slug' => $post->slug,
+                'body' => $post->body,
+                'image' => $post->image,
+                'publish_date' => Carbon::createFromFormat('Y-m-d H:i:s', $post->created_at)->toDateTimeString(),
+                'user' => [
+                    'name' => $post->user->name,
+                    'user_profile' => $post->user->user_profile
+                ],
+                'category' => [
+                    'name' => $post->category->category_name,
+                    'category_slug' => $post->category->category_slug,
+                ]
+            ],
+
+        ], Response::HTTP_OK);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Post not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'body' => 'required',
+            'image' => 'required',
+            'user_id' => 'required',
+            'category_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        try {
+            $post->update([
+                'title' => $request->input('title'),
+                'slug' => Str::slug($request->input('title')),
+                'body' => $request->input('body'),
+                'image' => $request->input('image'),
+                'user_id' => $request->input('user_id'),
+                'category_id' => $request->input('category_id'),
+            ]);
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => 'Data updated'
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error update data :' . $e->getMessage());
+
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'failed stored data to db'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $post = Post::find($id);
+
+        try {
+            $post->delete();
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => 'Post deleted'
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error deleted data :' . $e->getMessage());
+
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'failed deleted data to db'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -14,23 +14,32 @@ Route::get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     Route::controller(PostController::class)->group(function () {
         Route::get('/posts', 'index');
+        Route::get('/post/search', 'index');
         Route::post('/post', 'store');
         Route::get('/post/{slug}', 'show');
+        Route::put('/post/{id}/update', 'update');
+        Route::delete('/post/{id}/delete', 'destroy');
     });
 
     Route::controller(RoleController::class)->group(function () {
         Route::get('/roles', 'index');
         Route::post('/role', 'store');
+        Route::put('/role/{id}/update', 'update');
+        Route::delete('/role/{id}/delete', 'destroy');
     });
 
     Route::controller(UserController::class)->group(function () {
         Route::get('/users', 'index');
-        Route::post('/users', 'store');
+        Route::get('/user/{username}/profile', 'show');
+        Route::put('/user/{id}/update', 'update');
+        Route::delete('/user/{id}/delete', 'destroy');
     });
 
     Route::controller(CategoryController::class)->group(function () {
         Route::get('/categories', 'index');
         Route::post('/category', 'store');
-        // Route::get('/category/{slug}', 'show');
+        Route::get('/category/{slug}', 'show');
+        Route::put('/category/{id}/update', 'update');
+        Route::delete('/category/{id}/delete', 'destroy');
     });
 });

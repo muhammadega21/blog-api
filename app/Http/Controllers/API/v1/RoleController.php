@@ -22,7 +22,6 @@ class RoleController extends Controller
                 'status' => Response::HTTP_OK,
                 'data' => $roles->map(function ($role) {
                     return [
-                        'id' => $role->id,
                         'role_name' => $role->role_name
                     ];
                 }),
@@ -60,6 +59,64 @@ class RoleController extends Controller
             return response()->json([
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => 'failed stored data to db'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $role = Role::find($id);
+
+        if (!$role) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Role not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'role_name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        try {
+            $role->update([
+                'role_name' => $request->input('role_name'),
+            ]);
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => 'Data updated'
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error update data :' . $e->getMessage());
+
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'failed stored data to db'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $role = Role::find($id);
+
+        try {
+            $role->delete();
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => 'Role deleted'
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error deleted data :' . $e->getMessage());
+
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'failed deleted data to db'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

@@ -17,31 +17,31 @@ class CategoryController extends Controller
     {
         $categories = Category::get();
 
-        if ($categories) {
+        if ($categories->isEmpty()) {
             return response()->json([
-                'message' => 'List Category',
-                'status' => Response::HTTP_OK,
-                'data' => $categories->map(function ($category) {
-                    return [
-                        'category_name' => $category->category_name,
-                        'category_slug' => $category->category_slug,
-                        'category_icon' => $category->category_icon,
-                    ];
-                }),
-            ], Response::HTTP_OK);
-        } else {
-            return response()->json([
-                'message' => 'Category empty',
+                'message' => 'Post empty',
                 'status' => Response::HTTP_NOT_FOUND,
             ], Response::HTTP_NOT_FOUND);
         }
+
+        return response()->json([
+            'message' => 'List Category',
+            'status' => Response::HTTP_OK,
+            'data' => $categories->map(function ($category) {
+                return [
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'icon' => $category->icon,
+                ];
+            }),
+        ], Response::HTTP_OK);
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'category_name' => 'required',
-            'category_icon' => 'required',
+            'name' => 'required',
+            'icon' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -50,9 +50,9 @@ class CategoryController extends Controller
 
         try {
             Category::create([
-                'category_name' => $request->input('category_name'),
-                'category_slug' => Str::slug($request->input('category_name')),
-                'category_icon' => $request->input('category_icon'),
+                'name' => $request->input('name'),
+                'slug' => Str::slug($request->input('name')),
+                'icon' => $request->input('icon'),
             ]);
 
             return response()->json([
@@ -70,24 +70,64 @@ class CategoryController extends Controller
         }
     }
 
-    // public function show($slug)
-    // {
-    //     $category = Category::where('category_slug', $slug)->first();
+    public function update(Request $request, $id)
+    {
+        $category = Category::find($id);
 
-    //     if ($category) {
-    //         return response()->json([
-    //             'status' => Response::HTTP_OK,
-    //             'data' =>  [
-    //                 'category_name' => $category->category_name,
-    //                 'category_icon' => $category->category_icon,
-    //             ],
+        if (!$category) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Category not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
 
-    //         ], Response::HTTP_OK);
-    //     } else {
-    //         return response()->json([
-    //             'message' => 'Category Not Found',
-    //             'status' => Response::HTTP_NOT_FOUND,
-    //         ], Response::HTTP_NOT_FOUND);
-    //     }
-    // }
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'icon' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        try {
+            $category->update([
+                'name' => $request->input('name'),
+                'slug' => Str::slug($request->input('name')),
+                'icon' => $request->input('icon'),
+            ]);
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => 'Data updated'
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error update data :' . $e->getMessage());
+
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'failed stored data to db'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $category = Category::find($id);
+
+        try {
+            $category->delete();
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => 'Category deleted'
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error deleted data :' . $e->getMessage());
+
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'failed deleted data to db'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
