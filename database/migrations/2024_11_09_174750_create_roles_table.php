@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('role_name', 15);
             $table->timestamps();
         });
+
+        Schema::table('roles', function (Blueprint $table) {
+            $table->softDeletes();
+        });
     }
 
     /**
@@ -24,5 +28,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('roles');
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
     }
 };

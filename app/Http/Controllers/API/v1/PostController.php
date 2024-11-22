@@ -26,7 +26,7 @@ class PostController extends Controller
 
         $posts = $query->paginate(10);
 
-        if ($posts->isEmpty()) {
+        if (!$posts) {
             return response()->json([
                 'message' => 'Post empty',
                 'status' => Response::HTTP_NOT_FOUND,
@@ -117,7 +117,7 @@ class PostController extends Controller
     {
         $post = Post::where('slug', $slug)->first();
 
-        if ($post->isEmpty()) {
+        if (!$post) {
             return response()->json([
                 'message' => 'Post empty',
                 'status' => Response::HTTP_NOT_FOUND,

@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -17,7 +18,7 @@ class CategoryController extends Controller
     {
         $categories = Category::get();
 
-        if ($categories->isEmpty()) {
+        if (!$categories) {
             return response()->json([
                 'message' => 'Post empty',
                 'status' => Response::HTTP_NOT_FOUND,
@@ -40,19 +41,34 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'icon' => 'required',
+            'name' => 'required|max:30|unique:categories,name',
+            'icon' => 'required|mimes:png,svg|max:2048',
+        ], [
+            'name.required' => 'Nama Kategori Tidak Boleh Kosong!',
+            'name.max' => 'Nama Kategori Tidak Lebih 30 Karakter!',
+            'name.unique' => 'Nama Kategori Sudah Ada!',
+
+            'icon.required' => 'Icon Tidak Boleh Kosong!',
+            'icon.mimes' => 'Icon Harus Berformat jpg dan svg!',
+            'icon.max' => 'Icon Tidak Lebih dari 3mb!',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
 
+        if ($request->file('icon')) {
+            if ($request->oldIcon) {
+                Storage::delete($request->oldIcon);
+            }
+            $icon = $request->file('icon')->store('categoryIcons');
+        }
+
         try {
             Category::create([
                 'name' => $request->input('name'),
                 'slug' => Str::slug($request->input('name')),
-                'icon' => $request->input('icon'),
+                'icon' => $icon,
             ]);
 
             return response()->json([
@@ -81,20 +97,40 @@ class CategoryController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'icon' => 'required',
+        $rules = [
+            'icon' => 'required|mimes:png,svg|max:2048',
+        ];
+
+        if ($request->input('name') != $category->title) {
+            $rules['name'] = 'required|max:30|unique:categories,name';
+        }
+
+        $validator = Validator::make($request->all(), $rules, [
+            'name.required' => 'Nama Kategori Tidak Boleh Kosong!',
+            'name.max' => 'Nama Kategori Tidak Lebih 30 Karakter!',
+            'name.unique' => 'Nama Kategori Sudah Ada!',
+
+            'icon.required' => 'Icon Tidak Boleh Kosong!',
+            'icon.mimes' => 'Icon Harus Berformat jpg dan svg!',
+            'icon.max' => 'Icon Tidak Lebih dari 3mb!',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
 
+        if ($request->file('icon')) {
+            if ($request->oldIcon) {
+                Storage::delete($request->oldIcon);
+            }
+            $icon = $request->file('icon')->store('categoryIcons');
+        }
+
         try {
             $category->update([
                 'name' => $request->input('name'),
                 'slug' => Str::slug($request->input('name')),
-                'icon' => $request->input('icon'),
+                'icon' => $icon,
             ]);
 
             return response()->json([
@@ -116,6 +152,9 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         try {
+            if ($category->icon) {
+                Storage::delete($category->icon);
+            }
             $category->delete();
             return response()->json([
                 'status' => Response::HTTP_OK,
