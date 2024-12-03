@@ -37,7 +37,11 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'role_name' => 'required',
+            'role_name' => 'required|max:15|unique:roles,role_name',
+        ], [
+            'role_name.required' => 'Nama Role Tidak Boleh Kosong!',
+            'role_name.max' => 'Nama Role Tidak Lebih Dari 15 Karakter!',
+            'role_name.unique' => 'Nama Role Ini Sudah Ada!',
         ]);
 
         if ($validator->fails()) {
@@ -74,8 +78,16 @@ class RoleController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $validator = Validator::make($request->all(), [
-            'role_name' => 'required',
+        $rules = [];
+
+        if ($request->input('role_name') != $role->role_name) {
+            $rules['role_name'] = 'required|max:15|unique:roles,role_name';
+        }
+
+        $validator = Validator::make($request->all(), $rules, [
+            'role_name.required' => 'Nama Role Tidak Boleh Kosong!',
+            'role_name.max' => 'Nama Role Tidak Lebih Dari 15 Karakter!',
+            'role_name.unique' => 'Nama Role Ini Sudah Ada!',
         ]);
 
         if ($validator->fails()) {

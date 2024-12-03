@@ -20,7 +20,7 @@ class UserController extends Controller
 
         if ($users->isEmpty()) {
             return response()->json([
-                'message' => 'Post empty',
+                'message' => 'User empty',
                 'status' => Response::HTTP_NOT_FOUND,
             ], Response::HTTP_NOT_FOUND);
         }
@@ -52,9 +52,9 @@ class UserController extends Controller
         $user = User::where('username', $username)->first();
         $posts = Post::where('user_id', $user->id)->get();
 
-        if ($user->isEmpty()) {
+        if (!$user) {
             return response()->json([
-                'message' => 'Post empty',
+                'message' => 'User empty',
                 'status' => Response::HTTP_NOT_FOUND,
             ], Response::HTTP_NOT_FOUND);
         }
@@ -106,10 +106,31 @@ class UserController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required',
-            'user_desc' => 'required',
+        $rules = [
+            'name' => 'required|min:4|max:50',
+            'email' => 'required|email:rfc,dns',
+            'user_profile' => 'mimes:png,jpg,jpeg|max:2048',
+        ];
+
+        if ($request->input('username') != $user->username) {
+            $rules['username'] = 'required|min:4|max:10|unique:users,username';
+        }
+
+        $validator = Validator::make($request->all(), $rules, [
+            'name.required' => 'Nama Tidak Boleh Kosong!',
+            'name.min' => 'Nama Tidak Kurang Dari 4 Karakter!',
+            'name.max' => 'Nama Tidak Lebih Dari 50 Karakter!',
+
+            'username.required' => 'Username Tidak Boleh Kosong!',
+            'username.min' => 'Username Tidak Kurang Dari 4 Karakter!',
+            'username.max' => 'Username Tidak Lebih Dari 10 Karakter!',
+            'username.unique' => 'Username Sudah Digunakan!',
+
+            'email.required' => 'Email Tidak Boleh Kosong',
+            'email.email' => 'Email Yang Anda Masukkan Salah!',
+
+            'user_profile.mines' => 'Gambar Harus Berformat jpg, jpeg, dan png!',
+            'user_profile.max' => 'Gambar Tidak Lebih dari 2mb!'
         ]);
 
         if ($validator->fails()) {
@@ -125,7 +146,7 @@ class UserController extends Controller
                 'ig_url' => $request->input('ig_url'),
                 'fb_url' => $request->input('fb_url'),
                 'twitter_url' => $request->input('twitter_url'),
-                'role_id' => $request->input('role_id'),
+                'role_id' => $user->role_id,
             ]);
 
             return response()->json([

@@ -8,10 +8,12 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class PostController extends Controller
 {
@@ -66,7 +68,7 @@ class PostController extends Controller
             'category_id' => 'required',
         ], [
             'title.required' => 'Judul Tidak Boleh Kosong!',
-            'title.max' => 'Judul Tidak Lebih 100 Karakter!',
+            'title.max' => 'Judul Tidak Lebih Dari 100 Karakter!',
             'title.unique' => 'Judul Ini Sudah Ada!',
 
             'body.required' => 'Isi Postingan Tidak Boleh Kosong!',
@@ -169,7 +171,7 @@ class PostController extends Controller
 
         $validator = Validator::make($request->all(), $rules, [
             'title.required' => 'Judul Tidak Boleh Kosong!',
-            'title.max' => 'Judul Tidak Lebih 100 Karakter!',
+            'title.max' => 'Judul Tidak Lebih Dari 100 Karakter!',
             'title.unique' => 'Judul Ini Sudah Ada!',
 
             'body.required' => 'Isi Postingan Tidak Boleh Kosong!',
@@ -185,13 +187,22 @@ class PostController extends Controller
             return response()->json($validator->errors());
         }
 
+        $token = $request->bearerToken();
+        $currentUser = PersonalAccessToken::findToken($token)->tokenable->id;
+
+        if ($post->user_id !== $currentUser) {
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'You are not authorized to update this post'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         if ($request->file('image')) {
             if ($request->oldImage) {
                 Storage::delete($request->oldImage);
             }
             $image = $request->file('image')->store('postImages');
         }
-
 
         try {
             $post->update([
@@ -217,9 +228,19 @@ class PostController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         $post = Post::find($id);
+
+        $token = $request->bearerToken();
+        $currentUser = PersonalAccessToken::findToken($token)->tokenable->id;
+
+        if ($post->user_id !== $currentUser) {
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'You are not authorized to delete this post'
+            ], Response::HTTP_FORBIDDEN);
+        }
 
         try {
             if ($post->image) {

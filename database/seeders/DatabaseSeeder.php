@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             'role_name' => 'Administrator'
         ]);
         Role::create([
+            'role_name' => 'Editor'
+        ]);
+        Role::create([
             'role_name' => 'Author'
         ]);
 
@@ -49,7 +52,7 @@ class DatabaseSeeder extends Seeder
                             ',
             'ig_url' => 'https://www.instagram.com/kzm.mv/',
             'fb_url' => 'https://www.facebook.com/ega.dermawan.280899',
-            'role_id' => 2
+            'role_id' => 3
         ]);
 
         Category::create([

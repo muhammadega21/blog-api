@@ -14,8 +14,9 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+
         $categories = Category::get();
 
         if (!$categories) {
@@ -45,7 +46,7 @@ class CategoryController extends Controller
             'icon' => 'required|mimes:png,svg|max:2048',
         ], [
             'name.required' => 'Nama Kategori Tidak Boleh Kosong!',
-            'name.max' => 'Nama Kategori Tidak Lebih 30 Karakter!',
+            'name.max' => 'Nama Kategori Tidak Lebih Dari 30 Karakter!',
             'name.unique' => 'Nama Kategori Sudah Ada!',
 
             'icon.required' => 'Icon Tidak Boleh Kosong!',
@@ -101,13 +102,13 @@ class CategoryController extends Controller
             'icon' => 'required|mimes:png,svg|max:2048',
         ];
 
-        if ($request->input('name') != $category->title) {
+        if ($request->input('name') != $category->name) {
             $rules['name'] = 'required|max:30|unique:categories,name';
         }
 
         $validator = Validator::make($request->all(), $rules, [
             'name.required' => 'Nama Kategori Tidak Boleh Kosong!',
-            'name.max' => 'Nama Kategori Tidak Lebih 30 Karakter!',
+            'name.max' => 'Nama Kategori Tidak Lebih Dari 30 Karakter!',
             'name.unique' => 'Nama Kategori Sudah Ada!',
 
             'icon.required' => 'Icon Tidak Boleh Kosong!',
