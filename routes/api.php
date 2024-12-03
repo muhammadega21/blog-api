@@ -5,6 +5,7 @@ use App\Http\Controllers\API\v1\CategoryController;
 use App\Http\Controllers\API\v1\PostController;
 use App\Http\Controllers\API\v1\RoleController;
 use App\Http\Controllers\API\v1\UserController;
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +20,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/post/search', 'index');
         Route::get('/post/{slug}', 'show');
         Route::get('/posts', 'index');
-        Route::middleware('auth:sanctum')->group(function () {
+        Route::middleware('auth:sanctum', 'role:Administrator.Editor.Author')->group(function () {
             Route::post('/post', 'store');
             Route::put('/post/{id}/update', 'update');
             Route::delete('/post/{id}/delete', 'destroy');
@@ -27,7 +28,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::controller(UserController::class)->group(function () {
-        Route::middleware('auth:sanctum')->group(function () {
+        Route::middleware('auth:sanctum', 'role:Administrator.Editor')->group(function () {
             Route::get('/users', 'index');
             Route::put('/user/{id}/update', 'update');
             Route::delete('/user/{id}/delete', 'destroy');
@@ -35,7 +36,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/user/{username}/profile', 'show');
     });
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:sanctum', 'role:Administrator')->group(function () {
         Route::controller(RoleController::class)->group(function () {
             Route::get('/roles', 'index');
             Route::post('/role', 'store');

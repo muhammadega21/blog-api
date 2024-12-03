@@ -53,12 +53,11 @@ class AuthCotroller extends Controller
                 'user_profile' => 'img/user.png',
                 'role_id' => 3
             ]);
-            $token = $user->createToken('register_token')->plainTextToken;
+
             return response()->json([
                 'status' => Response::HTTP_OK,
+                'message' => 'User register successfully.',
                 'data' => $user,
-                'access_token' => $token,
-                'type' => 'Bearer'
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -91,7 +90,7 @@ class AuthCotroller extends Controller
             if (!$user || !Hash::check($request['password'], $user->password)) {
                 return response()->json([
                     'status' => Response::HTTP_UNAUTHORIZED,
-                    'message' => 'Invalid credentials'
+                    'message' => 'Email atau password salah!'
                 ], Response::HTTP_UNAUTHORIZED);
             }
         }
@@ -99,7 +98,7 @@ class AuthCotroller extends Controller
         $token = $user->createToken('login_token')->plainTextToken;
         return response()->json([
             'status' => Response::HTTP_OK,
-            'message' => 'Login Success',
+            'message' => 'User login successfully.',
             'access_token' => $token,
             'token_type' => 'Bearer'
         ], Response::HTTP_OK);

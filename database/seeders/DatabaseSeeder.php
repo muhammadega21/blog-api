@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
                             ',
             'ig_url' => 'https://www.instagram.com/kzm.mv/',
             'fb_url' => 'https://www.facebook.com/ega.dermawan.280899',
-            'role_id' => 3
+            'role_id' => 2
         ]);
 
         Category::create([
