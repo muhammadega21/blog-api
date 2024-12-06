@@ -5,8 +5,6 @@ use App\Http\Controllers\API\v1\CategoryController;
 use App\Http\Controllers\API\v1\PostController;
 use App\Http\Controllers\API\v1\RoleController;
 use App\Http\Controllers\API\v1\UserController;
-use App\Http\Middleware\RoleMiddleware;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthCotroller::class)->group(function () {
@@ -18,6 +16,7 @@ Route::controller(AuthCotroller::class)->group(function () {
 Route::prefix('v1')->group(function () {
     Route::controller(PostController::class)->group(function () {
         Route::get('/post/search', 'index');
+        Route::get('/post/category/{category:slug}', 'category');
         Route::get('/post/{slug}', 'show');
         Route::get('/posts', 'index');
         Route::middleware('auth:sanctum', 'role:Administrator.Editor.Author')->group(function () {
@@ -47,7 +46,6 @@ Route::prefix('v1')->group(function () {
         Route::controller(CategoryController::class)->group(function () {
             Route::get('/categories', 'index');
             Route::post('/category', 'store');
-            Route::get('/category/{slug}', 'show');
             Route::put('/category/{id}/update', 'update');
             Route::delete('/category/{id}/delete', 'destroy');
         });

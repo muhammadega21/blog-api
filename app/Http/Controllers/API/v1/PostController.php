@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Post;
 use Carbon\Carbon;
 use Exception;
@@ -26,6 +27,42 @@ class PostController extends Controller
             $query->where('title', 'LIKE', '%' . $keyword . '%');
         }
 
+        $posts = $query->paginate(10);
+
+        if (!$posts) {
+            return response()->json([
+                'message' => 'Post empty',
+                'status' => Response::HTTP_NOT_FOUND,
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'message' => 'List Posts',
+            'status' => Response::HTTP_OK,
+            'data' => $posts->map(function ($post) {
+                return [
+                    'title' => $post->title,
+                    'slug' => $post->slug,
+                    'body' => $post->body,
+                    'image' => $post->image,
+                    'publish_date' => $post->created_at->format('Y-m-d H:i:s'),
+                    'user' => [
+                        'name' => $post->user->name,
+                        'user_profile' => $post->user->user_profile,
+                    ],
+                    'category' => [
+                        'name' => $post->category->name,
+                        'category_slug' => $post->category->slug,
+                    ],
+                ];
+            }),
+        ], Response::HTTP_OK);
+    }
+
+    public function category($slug)
+    {
+        $category = Category::where('slug', $slug)->first();
+        $query = Post::where('category_id', $category->id)->latest('created_at');
         $posts = $query->paginate(10);
 
         if (!$posts) {
